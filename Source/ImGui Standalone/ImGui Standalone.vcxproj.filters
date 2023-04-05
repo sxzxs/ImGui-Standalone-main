@@ -98,6 +98,9 @@
     <ClInclude Include="src\timer.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\run.gif">
@@ -109,5 +112,25 @@
     <Image Include="src\cherry.jpg">
       <Filter>Fichiers de ressources</Filter>
     </Image>
+    <Image Include="C:\Users\hetong\Desktop\pic\OIG (2).jpg">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="C:\Users\hetong\Desktop\pic\cherry.png">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="icon1.ico">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="icon2.ico">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="pic\wsl.ico">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ImGui Standalone.rc">
+      <Filter>Fichiers de ressources</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

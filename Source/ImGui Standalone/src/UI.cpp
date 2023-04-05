@@ -1,5 +1,6 @@
 #include "UI.h"
 #include "Drawing.h"
+#include "../resource.h"
 
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_impl_win32.h"
@@ -93,6 +94,18 @@ LRESULT WINAPI UI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     switch (msg)
     {
+    case WM_CREATE:
+        {
+            // 加载图标资源
+            HINSTANCE hInstance = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hWnd, GWLP_HINSTANCE));
+            HICON hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+            HICON hIconSmall = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+            
+            // 设置窗口图标
+            SendMessage(hWnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hIcon));
+            SendMessage(hWnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hIconSmall));
+        }
+        break;
     case WM_SIZE:
         if (pd3dDevice != nullptr && wParam != SIZE_MINIMIZED)
         {
@@ -128,9 +141,11 @@ LRESULT WINAPI UI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 void UI::Render()
 {
     ImGui_ImplWin32_EnableDpiAwareness();
-    const WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, _T("ImGui Standalone"), nullptr };
+    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, _T("ImGui Standalone"), nullptr };
+    wc.hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1)); // 设置默认图标
+    wc.hIconSm = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1)); // 设置小图标
     ::RegisterClassEx(&wc);
-    const HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("ImGui Standalone"), WS_OVERLAPPEDWINDOW, 100, 100, 50, 50, NULL, NULL, wc.hInstance, NULL);
+    const HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("ImGui Standalone"), WS_OVERLAPPEDWINDOW, 100, 100, 500, 500, NULL, NULL, wc.hInstance, NULL);
 
     if (!CreateDeviceD3D(hwnd))
     {
@@ -139,17 +154,23 @@ void UI::Render()
         return;
     }
 
-    ::ShowWindow(hwnd, SW_HIDE);
-	::SetWindowPos(hwnd, HWND_TOPMOST, 0,0,0,0, SWP_NOSIZE|SWP_NOMOVE ); 
-    //::UpdateWindow(hwnd);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigViewportsNoAutoMerge = true;
+
+    int show_mode = SW_SHOWNORMAL;
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        show_mode = SW_HIDE;
+    }
+    ::ShowWindow(hwnd, show_mode);
+	::SetWindowPos(hwnd, HWND_TOPMOST, 0,0,0,0, SWP_NOSIZE|SWP_NOMOVE ); 
+    //::UpdateWindow(hwnd);
 
     ImGui::StyleColorsDark();
 
