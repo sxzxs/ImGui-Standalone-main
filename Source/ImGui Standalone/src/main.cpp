@@ -1,6 +1,8 @@
 #include "UI.h"
 
 #pragma comment(lib, "d3d11")
+#pragma comment(lib, "d3dx11.lib")
+#pragma comment(lib, "d3dcompiler.lib")
 #ifdef _WINDLL
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)

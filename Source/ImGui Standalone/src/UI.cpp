@@ -3,6 +3,8 @@
 
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_impl_win32.h"
+#include "utility.h"
+#include "timer.hpp"
 
 ID3D11Device* UI::pd3dDevice = nullptr;
 ID3D11DeviceContext* UI::pd3dDeviceContext = nullptr;
@@ -138,13 +140,16 @@ void UI::Render()
     }
 
     ::ShowWindow(hwnd, SW_HIDE);
-    ::UpdateWindow(hwnd);
+	::SetWindowPos(hwnd, HWND_TOPMOST, 0,0,0,0, SWP_NOSIZE|SWP_NOMOVE ); 
+    //::UpdateWindow(hwnd);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigViewportsNoAutoMerge = true;
 
     ImGui::StyleColorsDark();
 
@@ -154,8 +159,6 @@ void UI::Render()
         style.WindowRounding = 4.0f;
         style.Colors[ImGuiCol_WindowBg].w = 1.0f;
     }
-
-
 
     const HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
     MONITORINFO info = {};
@@ -182,6 +185,21 @@ void UI::Render()
     const ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     bool bDone = false;
+
+    //º”‘ÿÕº∆¨
+    Drawing::click_image_id = ImageFromFile(L"pic\\ø®≈∆.jpg", UI::pd3dDevice);
+    //º”‘ÿ∂ØÕº
+    imgui_stbi__load_gif(L"pic\\run.gif", UI::pd3dDevice, Drawing::run_gif);
+
+    std::shared_ptr<Timer> t(new Timer());
+    t->setInterval([=]() 
+    {
+        Drawing::run_gif.current_index++;
+        if (Drawing::run_gif.current_index == Drawing::run_gif.srv_array.size() - 1)
+        {
+            Drawing::run_gif.current_index = 0;
+        }
+    }, 200); 
 
     while (!bDone)
     {
@@ -221,8 +239,6 @@ void UI::Render()
         #ifndef _WINDLL
         if (!Drawing::isActive())
         {
-			auto fontAtlas = ImGui::GetIO().Fonts;
-            //Drawing::m_font->ClearOutputData();
             break;
         }
         #endif

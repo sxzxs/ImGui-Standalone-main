@@ -1,12 +1,21 @@
-#include "Drawing.h"
+ï»¿#include "Drawing.h"
 #include <string>
 #include "simhei.h"
 
 LPCSTR Drawing::lpWindowName = "ImGui Standalone";
 ImVec2 Drawing::vWindowSize = { 500, 500 };
-ImGuiWindowFlags Drawing::WindowFlags = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize;
+ImVec2 Drawing::mini_window_size = { 89, 30 };
+ImGuiWindowFlags Drawing::WindowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar |
+										ImGuiWindowFlags_NoResize;
 bool Drawing::bDraw = true;
+
+bool Drawing::is_contraction_of_the_window = false;
+
 ImFont *Drawing::m_font = nullptr;
+
+ImTextureID Drawing::click_image_id{};
+
+GIF_STRUCT Drawing::run_gif{};
 
 void Drawing::Active()
 {
@@ -22,11 +31,48 @@ void Drawing::Draw()
 {
 	if (isActive())
 	{
-		ImGui::SetNextWindowSize(vWindowSize);
+		static bool is_first_run = true;
+		if (is_first_run)
+		{
+			ImGui::SetNextWindowSize(vWindowSize);
+			is_first_run = false;
+		}
 		ImGui::SetNextWindowBgAlpha(1.0f);
 		ImGui::Begin(lpWindowName, &bDraw, WindowFlags);
 		{
-			ImGui::Text("Test");
+			ImGui::SetCursorPosY(0);
+			if(ImGui::Button(u8"å¼€å¯å±•å¼€"))
+			{
+				if (!is_contraction_of_the_window)
+				{
+					ImGui::SetWindowSize(mini_window_size);
+					WindowFlags = WindowFlags | ImGuiWindowFlags_NoScrollbar;
+				}
+				else
+				{
+					ImGui::SetWindowSize(vWindowSize);
+					WindowFlags = WindowFlags & ~ImGuiWindowFlags_NoScrollbar;
+				}
+				is_contraction_of_the_window = !is_contraction_of_the_window;
+			}
+			ImGui::SetCursorPos({440, 0});
+			ImGui::Button(u8"å…³é—­");
+			ImGui::Separator();
+
+			ImGui::Columns(2);
+			static int with_colum1 = 100;
+			ImGui::SetColumnOffset(1, with_colum1);
+			{
+				ImGui::Button("A");
+				ImGui::Button("B");
+				ImGui::Button("C");
+				ImGui::Button("D");
+			}
+			ImGui::NextColumn();
+			{
+				ImGui::ImageButton(run_gif.srv_array[run_gif.current_index], { 50, 50 });
+				ImGui::Text("Test");
+			}
 		}
 		ImGui::End();
 	}
@@ -43,8 +89,9 @@ void Drawing::set_style()
 
 	style.WindowBorderSize = 0;
 	style.WindowTitleAlign = ImVec2(0.5, 0.5);
-	style.WindowMinSize = ImVec2(400, 230);
+	style.WindowMinSize = mini_window_size;
 
+	style.WindowPadding = { 0, 0 };
 	style.FramePadding = ImVec2(8, 6);
 
 	style.TabBorderSize = 1.0f;
@@ -87,14 +134,15 @@ void Drawing::set_style()
 
 void Drawing::load_font(float size_pixels /*= 16.0f*/)
 {
+	ImGuiIO& io = ImGui::GetIO();
 	auto fontAtlas = ImGui::GetIO().Fonts;
 	fontAtlas->ClearFonts();
 	auto glyphRange = fontAtlas->GetGlyphRangesVietnamese();
 	glyphRange = fontAtlas->GetGlyphRangesChineseFull();
 	ImVector<ImWchar> myRange;
-	static std::string ranges_string(u8"¿¨ÅÆÇÐÅÆ ¹Ø±Õ È¡É«1234567890 .*!@#$%^&*()_-=+ "
+	static std::string ranges_string(u8"å¡ç‰Œåˆ‡ç‰Œ å…³é—­ å–è‰²1234567890 .*!@#$%^&*()_-=+ "
 		"abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ "
-		"ÏÔÊ¾Òþ²ØÖÕ¶Ë ×ø±ê, yµÈ´ýÊ±¼ä Ö÷½çÃæ ÆäËû ±£´æÅäÖÃ ÑÕÉ«ÉèÖÃ ÓÃ»§Ãû ÃÜÂë µÇÂ¼");
+		"æ˜¾ç¤ºéšè—ç»ˆç«¯ åæ ‡, yç­‰å¾…æ—¶é—´ ä¸»ç•Œé¢ å…¶ä»– ä¿å­˜é…ç½® é¢œè‰²è®¾ç½® ç”¨æˆ·å å¯†ç  ç™»å½•");
 	ImFontGlyphRangesBuilder myGlyph;
 	myGlyph.AddText(ranges_string.c_str());
 	myGlyph.BuildRanges(&myRange);
@@ -102,11 +150,13 @@ void Drawing::load_font(float size_pixels /*= 16.0f*/)
 	ImFontConfig config_words{};
 	config_words.OversampleH = 1;
 	config_words.OversampleV = 1;
-	config_words.FontDataOwnedByAtlas = false;
+	config_words.FontDataOwnedByAtlas = false; //ä»Žå†…å­˜åŠ è½½çš„fontï¼Œéœ€è¦è‡ªå·±ç®¡ç†å†…å­˜
 
+	ImFont* font = nullptr;
 	//ImFont* font = fontAtlas->AddFontFromMemoryTTF(simhei_font(), simhei_size, size_pixels, &config_words, myRange.Data);
-	ImFont* font = fontAtlas->AddFontFromMemoryTTF(simhei_font(), simhei_size, size_pixels, &config_words, glyphRange);	
+	font = fontAtlas->AddFontFromMemoryTTF(simhei_font(), simhei_size, size_pixels, &config_words, glyphRange);	
 	m_font = font;
+
 	int width, height;
 	unsigned char* pixels = NULL;
 	fontAtlas->GetTexDataAsAlpha8(&pixels, &width, &height);

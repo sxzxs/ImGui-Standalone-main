@@ -18,67 +18,96 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="src\main.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="ImGui\imgui.cpp">
+    <ClCompile Include="include\ImGui\imgui.cpp">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGui\imgui_demo.cpp">
+    <ClCompile Include="include\ImGui\imgui_demo.cpp">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGui\imgui_draw.cpp">
+    <ClCompile Include="include\ImGui\imgui_draw.cpp">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGui\imgui_tables.cpp">
+    <ClCompile Include="include\ImGui\imgui_tables.cpp">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGui\imgui_widgets.cpp">
+    <ClCompile Include="include\ImGui\imgui_widgets.cpp">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="UI.cpp">
+    <ClCompile Include="src\UI.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="Drawing.cpp">
+    <ClCompile Include="src\Drawing.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="ImGui\imgui_impl_dx11.cpp">
+    <ClCompile Include="include\ImGui\imgui_impl_dx11.cpp">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGui\imgui_impl_win32.cpp">
+    <ClCompile Include="include\ImGui\imgui_impl_win32.cpp">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utility.cpp">
+      <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ImGui\imconfig.h">
+    <ClInclude Include="include\ImGui\imconfig.h">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\imgui.h">
+    <ClInclude Include="include\ImGui\imgui.h">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\imgui_internal.h">
+    <ClInclude Include="include\ImGui\imgui_internal.h">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\imstb_rectpack.h">
+    <ClInclude Include="include\ImGui\imstb_rectpack.h">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\imstb_textedit.h">
+    <ClInclude Include="include\ImGui\imstb_textedit.h">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\imstb_truetype.h">
+    <ClInclude Include="include\ImGui\imstb_truetype.h">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="UI.h">
+    <ClInclude Include="src\UI.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="Drawing.h">
+    <ClInclude Include="src\Drawing.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\imgui_impl_dx11.h">
+    <ClInclude Include="include\ImGui\imgui_impl_dx11.h">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\imgui_impl_win32.h">
+    <ClInclude Include="include\ImGui\imgui_impl_win32.h">
       <Filter>Fichiers d%27en-tête\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="src\simhei.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stb_gif.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stb_image.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utility.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timer.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\run.gif">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="src\卡牌.jpg">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+    <Image Include="src\cherry.jpg">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
   </ItemGroup>
 </Project>
