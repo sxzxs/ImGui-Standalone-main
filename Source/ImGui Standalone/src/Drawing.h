@@ -6,6 +6,13 @@
 #include "ImGui/imgui.h"
 #include "utility.h"
 
+typedef enum FUNC_MENU
+{
+	MENU_MAIN = 0,
+	MENU_HELP,
+	MENU_SEARCH
+}FUNC_MENU_ENUM;
+
 class Drawing
 {
 private:

@@ -1,10 +1,13 @@
 ﻿#include "Drawing.h"
 #include <string>
 #include "simhei.h"
+//#include "icons.h"
+//#include "custom.h"
+#include "icon_font_awesome4.h"
 
 LPCSTR Drawing::lpWindowName = "ImGui Standalone";
-ImVec2 Drawing::vWindowSize = { 500, 500 };
-ImVec2 Drawing::mini_window_size = { 89, 30 };
+ImVec2 Drawing::vWindowSize = { 800, 500 };
+ImVec2 Drawing::mini_window_size = { 150, 30 };
 ImGuiWindowFlags Drawing::WindowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar |
 										ImGuiWindowFlags_NoResize;
 bool Drawing::bDraw = true;
@@ -35,13 +38,19 @@ void Drawing::Draw()
 		if (is_first_run)
 		{
 			ImGui::SetNextWindowSize(vWindowSize);
+			ImGui::SetNextWindowPos({ 0, 0 });
 			is_first_run = false;
 		}
 		ImGui::SetNextWindowBgAlpha(1.0f);
 		ImGui::Begin(lpWindowName, &bDraw, WindowFlags);
 		{
+			auto windows_pos = ImGui::GetWindowPos();
+			auto windows_size = ImGui::GetWindowSize();
+			auto win_draw_list = ImGui::GetWindowDrawList();
 			ImGui::SetCursorPosY(0);
-			if(ImGui::Button(u8"开启展开"))
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+			if(ImGui::Button(ICON_FA_THEMEISLE))
 			{
 				if (!is_contraction_of_the_window)
 				{
@@ -55,23 +64,85 @@ void Drawing::Draw()
 				}
 				is_contraction_of_the_window = !is_contraction_of_the_window;
 			}
-			ImGui::SetCursorPos({440, 0});
-			ImGui::Button(u8"关闭");
+			ImGui::PopStyleVar();
+
+			ImGui::SetCursorPos({windows_size.x - 32, 0});
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+			if (ImGui::Button(ICON_FA_WINDOW_CLOSE))
+			{
+				bDraw = !bDraw;
+			}
+			ImGui::PopStyleVar();
 			ImGui::Separator();
 
 			ImGui::Columns(2);
-			static int with_colum1 = 100;
+			static int with_colum1 = 90;
+			static FUNC_MENU_ENUM current_menu_index = MENU_MAIN;
 			ImGui::SetColumnOffset(1, with_colum1);
 			{
-				ImGui::Button("A");
-				ImGui::Button("B");
-				ImGui::Button("C");
-				ImGui::Button("D");
+				if (ImGui::Button(ICON_FA_LIST, ImVec2(60, 60)))
+				{
+					current_menu_index = MENU_MAIN;
+				}
+				if (current_menu_index == MENU_MAIN)
+				{
+					ImGui::SameLine();
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
+					ImGui::Text(ICON_FA_HAND_O_RIGHT);
+					ImGui::PopStyleColor();
+				}
+
+				if (ImGui::Button(ICON_FA_SEARCH, ImVec2(60, 60)))
+				{
+					current_menu_index = MENU_SEARCH;
+				}
+				if (current_menu_index == MENU_SEARCH)
+				{
+					ImGui::SameLine();
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
+					ImGui::Text(ICON_FA_HAND_O_RIGHT);
+					ImGui::PopStyleColor();
+				}
+
+				if (ImGui::Button(ICON_FA_HOME, ImVec2(60, 60)))
+				{
+					current_menu_index = MENU_HELP;
+				}
+				if (current_menu_index == MENU_HELP)
+				{
+					ImGui::SameLine();
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
+					ImGui::Text(ICON_FA_HAND_O_RIGHT);
+					ImGui::PopStyleColor();
+				}
+
+
+				if (!is_contraction_of_the_window)
+				{
+					//ImGui::Text("%f %f", windows_size.x, windows_size.y);
+					//ImGui::Text("%f %f", windows_pos.x, windows_pos.y);
+					//ImGui::SetCursorPos({0, windows_size.y - 70});
+					ImGui::SetCursorPosY(windows_size.y - 70);
+					//ImGui::ImageButton(run_gif.srv_array[run_gif.current_index], { 50, 50 });
+					win_draw_list->AddImage(run_gif.srv_array[run_gif.current_index], { windows_pos.x, windows_pos.y + windows_size.y - 70 }, {windows_pos.x + 60, windows_pos.y + windows_size.y});
+				}
 			}
 			ImGui::NextColumn();
 			{
-				ImGui::ImageButton(run_gif.srv_array[run_gif.current_index], { 50, 50 });
-				ImGui::Text("Test");
+				if (ImGui::BeginTabBar("MyTabBar"))
+				{
+					if (ImGui::BeginTabItem("Tab1"))
+					{
+						ImGui::Text("This is my first tab!");
+						ImGui::EndTabItem();
+					}
+					if (ImGui::BeginTabItem("Tab2"))
+					{
+						ImGui::Text("This is my second tab!");
+						ImGui::EndTabItem();
+					}
+					ImGui::EndTabBar();
+				}
 			}
 		}
 		ImGui::End();
@@ -136,7 +207,7 @@ void Drawing::load_font(float size_pixels /*= 16.0f*/)
 {
 	ImGuiIO& io = ImGui::GetIO();
 	auto fontAtlas = ImGui::GetIO().Fonts;
-	fontAtlas->ClearFonts();
+	//fontAtlas->ClearFonts();
 	auto glyphRange = fontAtlas->GetGlyphRangesVietnamese();
 	glyphRange = fontAtlas->GetGlyphRangesChineseFull();
 	ImVector<ImWchar> myRange;
@@ -147,15 +218,37 @@ void Drawing::load_font(float size_pixels /*= 16.0f*/)
 	myGlyph.AddText(ranges_string.c_str());
 	myGlyph.BuildRanges(&myRange);
 
+	ImFont* font = nullptr;
+	// 首先加载一个字体，后面的用merge模式， merge进默认字体
+	// 或者不调用，用户加载的第一个字体载入
+    //io.Fonts->AddFontDefault();
+
 	ImFontConfig config_words{};
-	config_words.OversampleH = 1;
+	config_words.MergeMode = false;
+	config_words.OversampleH = 2;
 	config_words.OversampleV = 1;
 	config_words.FontDataOwnedByAtlas = false; //从内存加载的font，需要自己管理内存
 
-	ImFont* font = nullptr;
 	//ImFont* font = fontAtlas->AddFontFromMemoryTTF(simhei_font(), simhei_size, size_pixels, &config_words, myRange.Data);
 	font = fontAtlas->AddFontFromMemoryTTF(simhei_font(), simhei_size, size_pixels, &config_words, glyphRange);	
 	m_font = font;
+
+    //static const ImWchar icons_ranges[] = { 0xf000, 0xf3ff, 0 };
+    static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+    ImFontConfig icons_config;
+
+    ImFontConfig CustomFont;
+    CustomFont.FontDataOwnedByAtlas = false;
+
+    icons_config.MergeMode = true;
+    icons_config.PixelSnapH = false;
+    icons_config.OversampleH = 2;
+    icons_config.OversampleV = 1;
+
+    //io.Fonts->AddFontFromMemoryTTF(const_cast<std::uint8_t*>(Custom), sizeof(Custom), 15, &CustomFont);
+    //io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, size_pixels, &icons_config, icons_ranges);
+	io.Fonts->AddFontFromFileTTF("fonts/fontawesome-webfont.ttf", 13.0f, &icons_config, icons_ranges);
+	io.Fonts->Build();
 
 	int width, height;
 	unsigned char* pixels = NULL;

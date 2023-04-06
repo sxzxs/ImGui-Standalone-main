@@ -11,7 +11,7 @@ ID3D11Device* UI::pd3dDevice = nullptr;
 ID3D11DeviceContext* UI::pd3dDeviceContext = nullptr;
 IDXGISwapChain* UI::pSwapChain = nullptr;
 ID3D11RenderTargetView* UI::pMainRenderTargetView = nullptr;
-
+static bool                     g_wndMinimized = false;
 bool UI::CreateDeviceD3D(HWND hWnd)
 {
     DXGI_SWAP_CHAIN_DESC sd;
@@ -87,6 +87,11 @@ void UI::CleanupDeviceD3D()
 #define WM_DPICHANGED 0x02E0 // From Windows SDK 8.1+ headers
 #endif
 
+#define ID_TRAY_APP_ICON    5000
+#define WM_TRAYICON         (WM_USER + 1)
+#define IDM_SHOW            100
+#define IDM_EXIT            101
+
 LRESULT WINAPI UI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
@@ -113,6 +118,14 @@ LRESULT WINAPI UI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             pSwapChain->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
             CreateRenderTarget();
         }
+        if (wParam == SIZE_MINIMIZED)
+        {
+            g_wndMinimized = true;
+        }
+        else if (wParam == SIZE_RESTORED)
+        {
+            g_wndMinimized = false;
+        }
         return 0;
 
     case WM_SYSCOMMAND:
@@ -132,11 +145,44 @@ LRESULT WINAPI UI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         break;
 
+    case WM_TRAYICON:
+        if (wParam == ID_TRAY_APP_ICON && lParam == WM_RBUTTONUP)
+        {
+            // 创建上下文菜单
+            HMENU hMenu = CreatePopupMenu();
+            AppendMenu(hMenu, MF_STRING, IDM_SHOW, L"&Show");
+            AppendMenu(hMenu, MF_STRING, IDM_EXIT, L"&Exit");
+
+            // 关联上下文菜单
+            POINT pt;
+            GetCursorPos(&pt);
+            SetForegroundWindow(hWnd);
+            TrackPopupMenu(hMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, hWnd, NULL);
+            PostMessage(hWnd, WM_NULL, 0, 0);
+            DestroyMenu(hMenu);
+        }
+        break;
+
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case IDM_SHOW:
+            ShowWindow(hWnd, SW_SHOWNORMAL);
+	        ::SetWindowPos(hWnd, HWND_TOPMOST, 0,0,0,0, SWP_NOSIZE|SWP_NOMOVE ); 
+            break;
+
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+        }
+        break;
+
     default:
         break;
     }
     return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }
+
 
 void UI::Render()
 {
@@ -144,8 +190,25 @@ void UI::Render()
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, _T("ImGui Standalone"), nullptr };
     wc.hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1)); // 设置默认图标
     wc.hIconSm = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1)); // 设置小图标
+
+
     ::RegisterClassEx(&wc);
-    const HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("ImGui Standalone"), WS_OVERLAPPEDWINDOW, 100, 100, 500, 500, NULL, NULL, wc.hInstance, NULL);
+    ::SetProcessDPIAware();
+    const HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("ImGui Standalone"), WS_OVERLAPPEDWINDOW, 100, 100, 900, 600, NULL, NULL, wc.hInstance, NULL);
+
+
+    HICON hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));
+    // 创建托盘图标
+    NOTIFYICONDATA nidApp = {};
+    nidApp.cbSize = sizeof(NOTIFYICONDATA);
+    nidApp.hWnd = hwnd;
+    nidApp.uID = ID_TRAY_APP_ICON;
+    nidApp.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
+    nidApp.uCallbackMessage = WM_TRAYICON;
+    nidApp.hIcon = hIcon;
+    lstrcpyn(nidApp.szTip, L"My App", sizeof(nidApp.szTip));
+    Shell_NotifyIcon(NIM_ADD, &nidApp);
+
 
     if (!CreateDeviceD3D(hwnd))
     {
@@ -153,7 +216,6 @@ void UI::Render()
         ::UnregisterClass(wc.lpszClassName, wc.hInstance);
         return;
     }
-
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -168,9 +230,6 @@ void UI::Render()
     {
         show_mode = SW_HIDE;
     }
-    ::ShowWindow(hwnd, show_mode);
-	::SetWindowPos(hwnd, HWND_TOPMOST, 0,0,0,0, SWP_NOSIZE|SWP_NOMOVE ); 
-    //::UpdateWindow(hwnd);
 
     ImGui::StyleColorsDark();
 
@@ -181,24 +240,11 @@ void UI::Render()
         style.Colors[ImGuiCol_WindowBg].w = 1.0f;
     }
 
-    const HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
-    MONITORINFO info = {};
-    info.cbSize = sizeof(MONITORINFO);
-    GetMonitorInfo(monitor, &info);
-    const int monitor_height = info.rcMonitor.bottom - info.rcMonitor.top;
-
-    if (monitor_height > 1080)
-    {
-        const float fScale = 2.0f;
-        ImFontConfig cfg;
-        cfg.SizePixels = 13 * fScale;
-        ImGui::GetIO().Fonts->AddFontDefault(&cfg);
-    }
-
     ImGui::GetIO().IniFilename = nullptr;
 
     Drawing::set_style();
     Drawing::load_font(18);
+
 
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(pd3dDevice, pd3dDeviceContext);
@@ -222,6 +268,10 @@ void UI::Render()
         }
     }, 200); 
 
+    ::ShowWindow(hwnd, show_mode);
+	::SetWindowPos(hwnd, HWND_TOPMOST, 0,0,0,0, SWP_NOSIZE|SWP_NOMOVE ); 
+    //::UpdateWindow(hwnd);
+
     while (!bDone)
     {
         MSG msg;
@@ -234,6 +284,20 @@ void UI::Render()
         }
         if (bDone)
             break;
+
+        // Don't render if the window is minimized
+        if (g_wndMinimized)
+        {
+            Sleep(1); // Let the processor sleep a bit
+            continue;
+        }
+
+        //解决 最小化时, CPU GPU利用率高的问题
+        //ocornut建议用上面方法
+		//if (ImGui::GetIO().Framerate > 61.f) 
+        //{
+			//std::this_thread::sleep_for(std::chrono::milliseconds(200)); // drop to 5 FPS when invisible
+		//}
 
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
@@ -264,6 +328,9 @@ void UI::Render()
         }
         #endif
     }
+
+    // 释放托盘图标
+    Shell_NotifyIcon(NIM_DELETE, &nidApp);
 
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();

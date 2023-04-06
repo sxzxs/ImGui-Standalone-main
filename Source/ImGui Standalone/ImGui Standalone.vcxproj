@@ -160,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="src\custom.h" />
     <ClInclude Include="src\Drawing.h" />
     <ClInclude Include="include\ImGui\imconfig.h" />
     <ClInclude Include="include\ImGui\imgui.h" />
@@ -169,6 +170,8 @@
     <ClInclude Include="include\ImGui\imstb_rectpack.h" />
     <ClInclude Include="include\ImGui\imstb_textedit.h" />
     <ClInclude Include="include\ImGui\imstb_truetype.h" />
+    <ClInclude Include="src\icons.h" />
+    <ClInclude Include="src\icon_font_awesome4.h" />
     <ClInclude Include="src\simhei.h" />
     <ClInclude Include="src\stb_gif.h" />
     <ClInclude Include="src\stb_image.h" />
@@ -178,9 +181,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="C:\Users\hetong\Desktop\pic\cherry.png" />
-    <Image Include="C:\Users\hetong\Desktop\pic\OIG (2).jpg" />
-    <Image Include="icon1.ico" />
-    <Image Include="icon2.ico" />
     <Image Include="pic\wsl.ico" />
     <Image Include="src\cherry.jpg" />
     <Image Include="src\run.gif" />
