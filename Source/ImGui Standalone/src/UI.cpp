@@ -257,7 +257,6 @@ void UI::Render()
     Drawing::click_image_id = ImageFromFile(L"pic\\ø®≈∆.jpg", UI::pd3dDevice);
     //º”‘ÿ∂ØÕº
     imgui_stbi__load_gif(L"pic\\run.gif", UI::pd3dDevice, Drawing::run_gif);
-
     std::shared_ptr<Timer> t(new Timer());
     t->setInterval([=]() 
     {
@@ -267,6 +266,11 @@ void UI::Render()
             Drawing::run_gif.current_index = 0;
         }
     }, 200); 
+
+    //±≥æ∞Õº∆¨
+    Drawing::back_image_id = ImageFromFile(L"pic\\back.jpg", UI::pd3dDevice);
+    
+    ImageGetSize(Drawing::back_image_id, &Drawing::back_image_size.w, &Drawing::back_image_size.h);
 
     ::ShowWindow(hwnd, show_mode);
 	::SetWindowPos(hwnd, HWND_TOPMOST, 0,0,0,0, SWP_NOSIZE|SWP_NOMOVE ); 

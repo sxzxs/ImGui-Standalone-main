@@ -1,24 +1,33 @@
 ﻿#include "Drawing.h"
 #include <string>
 #include "simhei.h"
-//#include "icons.h"
-//#include "custom.h"
-#include "icon_font_awesome4.h"
+//#include "icon_font_awesome4.h"
+#include "IconsFontAwesome6.h"
+#include "IconsFontAwesome6Brands.h"
 
-LPCSTR Drawing::lpWindowName = "ImGui Standalone";
+LPCSTR Drawing::lpWindowName{ "ImGui Standalone" };
 ImVec2 Drawing::vWindowSize = { 800, 500 };
 ImVec2 Drawing::mini_window_size = { 150, 30 };
-ImGuiWindowFlags Drawing::WindowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar |
-										ImGuiWindowFlags_NoResize;
-bool Drawing::bDraw = true;
+ImGuiWindowFlags Drawing::WindowFlags{ ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar |
+										ImGuiWindowFlags_NoResize };
+bool Drawing::bDraw{ true };
 
-bool Drawing::is_contraction_of_the_window = false;
+bool Drawing::is_contraction_of_the_window{ false };
 
-ImFont *Drawing::m_font = nullptr;
+
+unsigned int Drawing::current_choose_tab[]{};
+
+ImFont* Drawing::m_font{ nullptr };
+
+
+ImTextureID Drawing::back_image_id{};
 
 ImTextureID Drawing::click_image_id{};
 
 GIF_STRUCT Drawing::run_gif{};
+
+
+IMAGE_SIZE_STRUCT Drawing::back_image_size{};
 
 void Drawing::Active()
 {
@@ -30,8 +39,47 @@ bool Drawing::isActive()
 	return bDraw == true;
 }
 
+namespace ImGui
+{
+	bool tab_icon_button(const char* label, FUNC_MENU_ENUM &current_menu_index, FUNC_MENU_ENUM m_menu_index)
+	{
+		bool is_click = false;
+
+		if (m_menu_index == current_menu_index)
+		{
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
+			if (ImGui::Button(label, ImVec2(60, 60)))
+			{
+				is_click = true;
+				current_menu_index = m_menu_index;
+			}
+			ImGui::PopStyleColor();
+		}
+		else
+		{
+			if (ImGui::Button(label, ImVec2(60, 60)))
+			{
+				current_menu_index = m_menu_index;
+			}
+		}
+
+		//if (current_menu_index == m_menu_index)
+		//{
+		//	ImGui::SameLine();
+		//	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
+		//	ImGui::Text(ICON_FA_ANGLES_RIGHT);
+		//	ImGui::PopStyleColor();
+		//}
+
+		return is_click;
+	}
+}
+
 void Drawing::Draw()
 {
+	//render 背景图片
+	auto back_image_list = ImGui::GetBackgroundDrawList();
+	back_image_list->AddImage(back_image_id, {0, 0}, {back_image_size.w, back_image_size.h});
 	if (isActive())
 	{
 		static bool is_first_run = true;
@@ -68,7 +116,7 @@ void Drawing::Draw()
 
 			ImGui::SetCursorPos({windows_size.x - 32, 0});
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
-			if (ImGui::Button(ICON_FA_WINDOW_CLOSE))
+			if (ImGui::Button("X"))
 			{
 				bDraw = !bDraw;
 			}
@@ -76,52 +124,17 @@ void Drawing::Draw()
 			ImGui::Separator();
 
 			ImGui::Columns(2);
-			static int with_colum1 = 90;
+			static int with_colum1 = 70;
 			static FUNC_MENU_ENUM current_menu_index = MENU_MAIN;
 			ImGui::SetColumnOffset(1, with_colum1);
 			{
-				if (ImGui::Button(ICON_FA_LIST, ImVec2(60, 60)))
-				{
-					current_menu_index = MENU_MAIN;
-				}
-				if (current_menu_index == MENU_MAIN)
-				{
-					ImGui::SameLine();
-					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
-					ImGui::Text(ICON_FA_HAND_O_RIGHT);
-					ImGui::PopStyleColor();
-				}
-
-				if (ImGui::Button(ICON_FA_SEARCH, ImVec2(60, 60)))
-				{
-					current_menu_index = MENU_SEARCH;
-				}
-				if (current_menu_index == MENU_SEARCH)
-				{
-					ImGui::SameLine();
-					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
-					ImGui::Text(ICON_FA_HAND_O_RIGHT);
-					ImGui::PopStyleColor();
-				}
-
-				if (ImGui::Button(ICON_FA_HOME, ImVec2(60, 60)))
-				{
-					current_menu_index = MENU_HELP;
-				}
-				if (current_menu_index == MENU_HELP)
-				{
-					ImGui::SameLine();
-					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
-					ImGui::Text(ICON_FA_HAND_O_RIGHT);
-					ImGui::PopStyleColor();
-				}
-
+				ImGui::tab_icon_button(ICON_FA_LIST, current_menu_index, MENU_MAIN);
+				ImGui::tab_icon_button(ICON_FA_ANGLES_UP, current_menu_index, MENU_HELP);
+				ImGui::tab_icon_button(ICON_FA_ARROW_DOWN_9_1, current_menu_index, MENU_SEARCH);
 
 				if (!is_contraction_of_the_window)
 				{
-					//ImGui::Text("%f %f", windows_size.x, windows_size.y);
-					//ImGui::Text("%f %f", windows_pos.x, windows_pos.y);
-					//ImGui::SetCursorPos({0, windows_size.y - 70});
+					ImGui::SetCursorPos({0, windows_size.y - 70});
 					ImGui::SetCursorPosY(windows_size.y - 70);
 					//ImGui::ImageButton(run_gif.srv_array[run_gif.current_index], { 50, 50 });
 					win_draw_list->AddImage(run_gif.srv_array[run_gif.current_index], { windows_pos.x, windows_pos.y + windows_size.y - 70 }, {windows_pos.x + 60, windows_pos.y + windows_size.y});
@@ -131,15 +144,27 @@ void Drawing::Draw()
 			{
 				if (ImGui::BeginTabBar("MyTabBar"))
 				{
-					if (ImGui::BeginTabItem("Tab1"))
+					if (MENU_MAIN == current_menu_index)
 					{
-						ImGui::Text("This is my first tab!");
-						ImGui::EndTabItem();
-					}
-					if (ImGui::BeginTabItem("Tab2"))
-					{
-						ImGui::Text("This is my second tab!");
-						ImGui::EndTabItem();
+						if (ImGui::BeginTabItem("Tab1"))
+						{
+							ImGui::Text(u8"第一个TAB");
+							ImGui::EndTabItem();
+
+							static bool is_show_demo = false;
+							ImGui::Checkbox("show demo", &is_show_demo);
+							if (is_show_demo)
+							{
+								ImGui::ShowDemoWindow(&is_show_demo);
+							}
+							ImGui::Text("%f %f", windows_size.x, windows_size.y);
+							ImGui::Text("%f %f", windows_pos.x, windows_pos.y);
+						}
+						if (ImGui::BeginTabItem(u8"Tab2"))
+						{
+							ImGui::Text(u8"第二个TAB");
+							ImGui::EndTabItem();
+						}
 					}
 					ImGui::EndTabBar();
 				}
@@ -229,25 +254,17 @@ void Drawing::load_font(float size_pixels /*= 16.0f*/)
 	config_words.OversampleV = 1;
 	config_words.FontDataOwnedByAtlas = false; //从内存加载的font，需要自己管理内存
 
-	//ImFont* font = fontAtlas->AddFontFromMemoryTTF(simhei_font(), simhei_size, size_pixels, &config_words, myRange.Data);
 	font = fontAtlas->AddFontFromMemoryTTF(simhei_font(), simhei_size, size_pixels, &config_words, glyphRange);	
 	m_font = font;
 
-    //static const ImWchar icons_ranges[] = { 0xf000, 0xf3ff, 0 };
-    static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    ImFontConfig icons_config;
-
-    ImFontConfig CustomFont;
-    CustomFont.FontDataOwnedByAtlas = false;
-
-    icons_config.MergeMode = true;
-    icons_config.PixelSnapH = false;
-    icons_config.OversampleH = 2;
-    icons_config.OversampleV = 1;
-
-    //io.Fonts->AddFontFromMemoryTTF(const_cast<std::uint8_t*>(Custom), sizeof(Custom), 15, &CustomFont);
-    //io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, size_pixels, &icons_config, icons_ranges);
-	io.Fonts->AddFontFromFileTTF("fonts/fontawesome-webfont.ttf", 13.0f, &icons_config, icons_ranges);
+    // merge in icons from Font Awesome
+	//io.Fonts->AddFontFromFileTTF("fonts/fontawesome-webfont.ttf", 13.0f, &icons_config, icons_ranges); //从文件中加载
+    static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
+    static const ImWchar icons_ranges_brands[] = { ICON_MIN_FAB, ICON_MAX_16_FAB, 0 };
+    ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true; icons_config.OversampleH = 2; icons_config.OversampleV = 1;
+	icons_config.FontDataOwnedByAtlas = false;
+    ImFont* FontAwesome = io.Fonts->AddFontFromMemoryCompressedTTF(fa6_solid_compressed_data, fa6_solid_compressed_size, 14.f, &icons_config, icons_ranges);
+    ImFont* FontAwesomeBrands = io.Fonts->AddFontFromMemoryCompressedTTF(fa_brands_400_compressed_data, fa_brands_400_compressed_size, 14.f, &icons_config, icons_ranges_brands);
 	io.Fonts->Build();
 
 	int width, height;

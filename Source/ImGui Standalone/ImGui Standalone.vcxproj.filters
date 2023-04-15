@@ -107,7 +107,10 @@
     <ClInclude Include="src\icon_font_awesome4.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="src\icons.h">
+    <ClInclude Include="src\IconsFontAwesome6.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IconsFontAwesome6Brands.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>

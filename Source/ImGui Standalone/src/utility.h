@@ -20,6 +20,8 @@ typedef struct GIF_STRUCT
 }GIF_STRUCT;
 
 bool imgui_stbi__load_gif(const wchar_t* filename, ID3D11Device* g_pd3dDevice, GIF_STRUCT &out_gif);
+
+void ImageGetSize(ImTextureID image, float* x, float* y);
 //È¡Ïûsd¼ì²é
 std::string wstr_utf8(const std::wstring& str);
 std::wstring utf8_wstr(const std::string& str);

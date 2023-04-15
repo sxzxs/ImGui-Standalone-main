@@ -170,7 +170,8 @@
     <ClInclude Include="include\ImGui\imstb_rectpack.h" />
     <ClInclude Include="include\ImGui\imstb_textedit.h" />
     <ClInclude Include="include\ImGui\imstb_truetype.h" />
-    <ClInclude Include="src\icons.h" />
+    <ClInclude Include="src\IconsFontAwesome6.h" />
+    <ClInclude Include="src\IconsFontAwesome6Brands.h" />
     <ClInclude Include="src\icon_font_awesome4.h" />
     <ClInclude Include="src\simhei.h" />
     <ClInclude Include="src\stb_gif.h" />
