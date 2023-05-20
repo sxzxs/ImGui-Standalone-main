@@ -1,6 +1,7 @@
 ﻿#include "Drawing.h"
 #include <string>
 #include "simhei.h"
+#include "global.h"
 //#include "icon_font_awesome4.h"
 #include "IconsFontAwesome6.h"
 #include "IconsFontAwesome6Brands.h"
@@ -159,6 +160,14 @@ void Drawing::Draw()
 							}
 							ImGui::Text("%f %f", windows_size.x, windows_size.y);
 							ImGui::Text("%f %f", windows_pos.x, windows_pos.y);
+							if (ImGui::Button(u8"显示终端"))
+							{
+								bool bVisible = (::GetWindowLong(Global::h_console, GWL_STYLE) & WS_VISIBLE) != 0;
+								if (bVisible)
+									ShowWindow(Global::h_console, SW_HIDE);
+								else
+									ShowWindow(Global::h_console, SW_NORMAL);
+							}
 						}
 						if (ImGui::BeginTabItem(u8"Tab2"))
 						{
